@@ -30,7 +30,7 @@ python app.py sentinel   # 读哨兵号第 1 页抓新蓝V（服务运行时每�
 
 `bm.js` 是书签源码，页面把它拼成 `javascript:` 链接让用户拖进收藏栏。用户在 x.com 自己的「正在关注」页点书签，
 它自动往下滚，一边拦截 X 自己的 Following 请求拿用户 id，一边扫页面卡片拿用户名，读完跳回本站，结果放在 `#bm=` 后面，
-不经过服务器。默认跳回 `http://localhost:8000/`，部署到服务器后把 `bm.js` 里的 `SITE` 改成你的域名。完全免费，用的是用户自己的登录状态。X 改版后如果失效，优先检查 `UserCell`、`primaryColumn`、
+不经过服务器。书签读完会自动跳回你部署的那个站点，不用改代码。完全免费，用的是用户自己的登录状态。X 改版后如果失效，优先检查 `UserCell`、`primaryColumn`、
 `AppTabBar_Profile_Link` 这几个 `data-testid` 是否还在。
 
 ## 免费数据源（小号）

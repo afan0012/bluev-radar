@@ -281,6 +281,7 @@ loadStats();
 let bmCode = '';
 fetch('/bm.js').then(r => r.text()).then(code => {
   // 去掉注释和缩进，手机书签网址短一点
+  code = code.replace(/const SITE = '[^']*';/, `const SITE = '${location.origin}/';`);   // 读完跳回当前部署的站点
   const min = code.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '').replace(/^\s+/gm, '').replace(/\n+/g, '\n').trim();
   bmCode = 'javascript:' + encodeURIComponent(min);
   $('bmlink').href = bmCode;
