@@ -1,7 +1,5 @@
 # 蓝V互关雷达
 
-在线版：https://bluefriends.heyafan.com
-
 列出你**还没关注**的中文蓝V：中文蓝V池 − 你已关注的人。
 
 - **建池子**：定时用 monid `anyapi /twitter.search` 搜 `互关 / 浇水 / 蓝V …` + `lang:zh filter:blue_verified`，把作者存进 SQLite。
