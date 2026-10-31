@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>蓝V互关雷达</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 22 22%22%3E%3Ccircle cx=%2211%22 cy=%2211%22 r=%2210%22 fill=%22%231d9bf0%22/%3E%3Cpath fill=%22white%22 d=%22M9.6 15.2 6.1 11.7l1.3-1.3 2.2 2.2 4.9-5.2 1.4 1.3z%22/%3E%3C/svg%3E">
+<style>
+:root{--bg:#000;--card:#16181c;--line:#2f3336;--text:#e7e9ea;--sub:#71767b;--blue:#1d9bf0;--ok:#00ba7c}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:640px;margin:0 auto;padding:24px 16px 80px}
+h1{font-size:24px;margin:0 0 4px}
+.sub{color:var(--sub);font-size:14px}
+form{display:flex;gap:8px;margin:20px 0 8px}
+input{flex:1;min-width:0;background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:999px;padding:12px 18px;font-size:16px;outline:none}
+input:focus{border-color:var(--blue)}
+button{background:var(--blue);color:#fff;border:0;border-radius:999px;padding:0 20px;font-size:15px;font-weight:700;cursor:pointer;white-space:nowrap}
+button:disabled{opacity:.5;cursor:default}
+.bar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin:16px 0;color:var(--sub);font-size:14px}
+.bar b{color:var(--text)}
+.bar select,.bar label{color:var(--text);font-size:14px}
+.bar select{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:4px 6px}
+.quota{margin-left:auto}
+.quota.full b{color:#f4212e}
+.msg{padding:16px;border:1px solid var(--line);border-radius:16px;color:var(--sub);margin:16px 0}
+.msg.err{color:#f4212e;border-color:#f4212e55}
+.prog{height:4px;background:var(--line);border-radius:2px;overflow:hidden;margin-top:10px}
+.prog i{display:block;height:100%;width:30%;background:var(--blue);animation:mv 1.2s infinite ease-in-out}
+@keyframes mv{0%{transform:translateX(-100%)}100%{transform:translateX(340%)}}
+.list{border-top:1px solid var(--line)}
+.row{display:flex;gap:12px;align-items:center;padding:12px 4px;border-bottom:1px solid var(--line)}
+.row.done{opacity:.4}
+.row img{width:44px;height:44px;border-radius:50%;background:var(--card);flex:none}
+.info{flex:1;min-width:0}
+.name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.name svg{width:16px;height:16px;vertical-align:-3px;margin-left:2px}
+.meta{color:var(--sub);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tw{color:var(--sub);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row a.btn{flex:none;background:var(--text);color:#000;text-decoration:none;border-radius:999px;padding:6px 16px;font-weight:700;font-size:14px}
+.row.done a.btn{background:transparent;color:var(--text);border:1px solid var(--line)}
+.btn2{background:transparent;border:1px solid var(--line);color:var(--text)}
+.tag{display:inline-block;font-size:12px;border-radius:4px;padding:0 5px;margin-left:6px;vertical-align:1px;font-weight:400}
+.tag.self{background:#1d9bf022;color:var(--blue)}
+.tag.good{background:#00ba7c22;color:var(--ok)}
+.tag.bad{background:#f4212e22;color:#f4212e}
+.mine{color:var(--sub);font-size:14px;margin:8px 0}
+.mine b{color:var(--ok)}
+.msg.ok{color:var(--ok);border-color:#00ba7c55}
+.tip{color:var(--sub);font-size:12px;margin-top:24px}
+.bm{border:1px solid var(--line);border-radius:16px;padding:12px 16px;margin:8px 0 16px;font-size:14px;color:var(--sub)}
+.bm summary{cursor:pointer;color:var(--text)}
+.bm ol{margin:8px 0 4px;padding-left:20px}
+.bm li{margin:4px 0}
+.bm a.drag{display:inline-block;background:var(--blue);color:#fff;text-decoration:none;border-radius:999px;padding:4px 14px;font-weight:700;cursor:grab}
+.bm a{color:var(--blue)}
+.bm button.drag{border:0;font-size:14px;padding:4px 14px;cursor:pointer}
+.bm .mob{display:none}
+@media (hover:none){.bm .pc{display:none}.bm ol.mob{display:block}.bm div.mob{display:block}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>蓝V互关雷达</h1>
+  <div class="sub">输入你的 X 用户名，列出你<b>还没关注</b>的中文蓝V · 池子共 <b id="pool">-</b> 人<span hidden>（主动上榜 <b id="joined">-</b>）</span> · 更新于 <span id="upd">-</span></div>
+
+  <form id="f">
+    <input id="u" placeholder="你的用户名，如 kk7702423" autocomplete="off" required>
+    <button id="go">查找</button>
+    <button id="join" type="button" class="btn2" hidden>我要上榜</button>
+  </form>
+
+  <details class="bm" id="bm">
+    <summary>⚡ 试试书签：免费、更快，关注再多也能读全</summary>
+    <ol class="pc">
+      <li>把这个按钮<b>拖到</b>浏览器收藏栏：<a class="drag" id="bmlink" href="#">⚡ 蓝V互关雷达</a>（看不到收藏栏就按 Ctrl+Shift+B）</li>
+      <li>打开 x.com，进入你的「正在关注」页</li>
+      <li>点收藏栏里的「⚡ 蓝V互关雷达」，读完会自动跳回这里</li>
+    </ol>
+    <ol class="mob">
+      <li>点这里 <button type="button" class="drag" id="bmcopy">复制书签代码</button></li>
+      <li>在手机浏览器（Safari / Chrome，<b>不是 X App</b>）里随便收藏一个网页，然后编辑这个书签：名称改成「蓝V雷达」，网址全部删掉，粘贴刚复制的代码</li>
+      <li>用浏览器打开 x.com 并登录，进入你的主页 →「正在关注」</li>
+      <li>iPhone：打开书签列表，点「蓝V雷达」<br>安卓 Chrome：在地址栏输入「蓝V雷达」，点下面出现的那个书签</li>
+    </ol>
+    <div class="mob">步骤有点多，嫌麻烦直接在上面输入用户名查找就行。</div>
+    书签只读取你的关注列表，不会关注、发推、点赞或读私信，数据也不会上传到我们的服务器。<a href="/bm.js" target="_blank">查看源码</a>
+  </details>
+
+  <div id="status"></div>
+
+  <div id="mine" class="mine" hidden></div>
+  <div id="bar" class="bar" hidden>
+    <span>你关注了 <b id="fc">0</b> 人 · 未关注蓝V <b id="cnt">0</b> 人</span>
+    <select id="sort">
+      <option value="rec">推荐</option>
+      <option value="seen">最近活跃</option>
+      <option value="rate">回关率高</option>
+      <option value="fans">粉丝多</option>
+      <option value="fans_asc">粉丝少（更易回关）</option>
+    </select>
+    <label><input type="checkbox" id="hide" checked style="vertical-align:-2px"> 隐藏已点</label>
+    <span class="quota" id="quota">今日已点 <b id="qn">0</b>/400</span>
+  </div>
+
+  <div id="list" class="list"></div>
+
+  <div class="tip">点“关注”会打开对方主页，请在 X 上手动关注。X 每天最多关注 400 人，短时间大量关注容易被限流，建议分散着点。<span hidden><br>
+  回关率：你在这里点过关注后，下次查找时会核验对方有没有回关你（72 小时内）。数据越多越准，常不回关的人会自动沉底。<br>
+  我要上榜：输入你的用户名再点“我要上榜”，你会排在别人列表的前面。</span></div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const BADGE = '<svg viewBox="0 0 22 22"><path fill="#1d9bf0" d="M20.4 11c0-1.4-.8-2.6-2-3.2.4-1.3.1-2.8-.9-3.8s-2.4-1.3-3.8-.9C13.1 1.9 11.9 1.1 10.5 1.1s-2.6.8-3.2 2C6 2.7 4.5 3 3.5 4s-1.3 2.4-.9 3.8C1.4 8.4.6 9.6.6 11s.8 2.6 2 3.2c-.4 1.3-.1 2.8.9 3.8s2.4 1.3 3.8.9c.6 1.2 1.8 2 3.2 2s2.6-.8 3.2-2c1.3.4 2.8.1 3.8-.9s1.3-2.4.9-3.8c1.2-.6 2-1.8 2-3.2z"/><path fill="#fff" d="M9.6 15.2 6.1 11.7l1.3-1.3 2.2 2.2 4.9-5.2 1.4 1.3z"/></svg>';
+const today = new Date().toISOString().slice(0, 10);
+let pool = null, followed = new Set(), followedNames = new Set(), me = null, shown = 100;
+const poolReady = fetch('/api/pool').then(r => r.json()).then(d => pool = d.items);
+
+// 本地记录已点过的人（只存在你这个浏览器）
+function store(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d } catch { return d } }
+function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)) } catch {} }
+let clicked = store('clicked', {});           // user_id -> 日期
+const todayCount = () => Object.values(clicked).filter(d => d === today).length;
+
+function ago(ts) {
+  if (!ts) return '-';
+  const s = Date.now() / 1000 - ts;
+  if (s < 3600) return Math.max(1, Math.floor(s / 60)) + ' 分钟前';
+  if (s < 86400) return Math.floor(s / 3600) + ' 小时前';
+  return Math.floor(s / 86400) + ' 天前';
+}
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => n >= 10000 ? (n / 10000).toFixed(1) + '万' : n;
+
+async function loadStats() {
+  const s = await fetch('/api/stats').then(r => r.json());
+  $('pool').textContent = s.pool_size;
+  $('joined').textContent = s.joined;
+  $('upd').textContent = ago(s.last_collect);
+}
+
+function render() {
+  if (!pool || !me) return;
+  const self = me.username.toLowerCase();
+  const all = pool.filter(x => {
+    const n = (x.username || '').toLowerCase();
+    return !followed.has(x.user_id) && !followedNames.has(n) && n !== self;
+  });
+  let items = all;
+  const sort = $('sort').value;
+  const rate = x => (x.back + 1) / (x.back + x.no_back + 2);   // 平滑回关率，没数据时=50%
+  const fresh = x => Date.now() / 1000 - x.last_seen < 2 * 86400;
+  const score = x => rate(x) + (x.source === 'self' ? 0.3 : 0) + (fresh(x) ? 0.2 : 0);
+  if (sort === 'rec') items.sort((a, b) => score(b) - score(a) || b.last_seen - a.last_seen);
+  if (sort === 'seen') items.sort((a, b) => b.last_seen - a.last_seen);
+  if (sort === 'rate') items.sort((a, b) => rate(b) - rate(a));
+  if (sort === 'fans') items.sort((a, b) => b.followers - a.followers);
+  if (sort === 'fans_asc') items.sort((a, b) => a.followers - b.followers);
+  if ($('hide').checked) items = items.filter(x => !clicked[x.user_id]);
+  $('fc').textContent = Math.max(followed.size, followedNames.size) + (me.complete ? '' : '+');
+  $('cnt').textContent = all.length + (me.complete ? '' : '+');
+  const q = todayCount();
+  $('qn').textContent = q;
+  $('quota').classList.toggle('full', q >= 400);
+  $('bar').hidden = false;
+  $('list').innerHTML = items.length ? items.slice(0, shown).map(x => `
+    <div class="row ${clicked[x.user_id] ? 'done' : ''}">
+      <img src="${esc(x.avatar)}" loading="lazy" alt="">
+      <div class="info">
+        <div class="name">${esc(x.name)}${BADGE}${tags(x)}</div>
+        <div class="meta">@${esc(x.username)} · ${fmt(x.followers)} 粉丝${x.last_seen ? ' · ' + ago(x.last_seen) + '活跃' : ''}</div>
+        <div class="tw">${esc(x.last_tweet)}</div>
+      </div>
+      <a class="btn" href="https://x.com/${esc(x.username)}" target="_blank" rel="noopener" data-id="${esc(x.user_id)}">${clicked[x.user_id] ? '已点' : '关注'}</a>
+    </div>`).join('') + (items.length > shown ? `<button id="more" class="btn2" style="width:100%;padding:12px;margin-top:12px">再显示 100 个（还有 ${items.length - shown} 个）</button>` : '')
+    : '<div class="msg">都关注过啦，晚点再来，池子每天都会更新。</div>';
+}
+
+function tags(x) {
+  let t = x.source === 'self' ? '<span class="tag self">主动上榜</span>' : '';
+  const n = x.back + x.no_back;
+  if (n) {
+    const r = Math.round(x.back / n * 100);
+    t += `<span class="tag ${n >= 3 && r < 30 ? 'bad' : r >= 60 ? 'good' : ''}">${n >= 3 && r < 30 ? '常不回关 ' : '回关率 '}${r}%·${n}</span>`;
+  }
+  return t;
+}
+$('list').addEventListener('click', e => {
+  if (e.target.id === 'more') { shown += 100; return render(); }
+  const a = e.target.closest('a.btn');
+  if (!a) return;
+  clicked[a.dataset.id] = today;
+  fetch('/api/click', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: me.username, to_id: a.dataset.id }) }).catch(() => {});
+  save('clicked', clicked);
+  setTimeout(render, 300);
+});
+$('sort').onchange = render;
+$('hide').onchange = render;
+
+function setStatus(html, cls = '') { $('status').innerHTML = html ? `<div class="msg ${cls}">${html}</div>` : '' }
+
+const prog = '<div class="prog"><i></i></div>';
+let running = 0;   // 防止连点时两次查询互相覆盖
+
+$('f').onsubmit = async e => {
+  e.preventDefault();
+  const username = $('u').value.trim();
+  save('username', username);
+  const run = ++running;
+  $('go').disabled = true;
+  $('list').innerHTML = '';
+  $('bar').hidden = true;
+  shown = 100;
+  setStatus('正在加载…' + prog);
+  try {
+    const [r] = await Promise.all([post('/api/check', { username }), poolReady]);
+    me = { username: r.username, complete: r.complete };
+    followed = new Set(r.ids);
+    followedNames = new Set();
+    if (r.status === 'running') {
+      me.complete = false;
+      let since = 0, j = r;
+      while (j.status === 'running') {
+        // 有缓存（增量刷新）就先出列表；第一次查询读到第一页就出列表
+        if (r.incremental || followed.size) render();
+        setStatus(r.incremental
+          ? `正在同步你最近的关注… 列表已可用，刚关注的人会自动消失${prog}`
+          : followed.size
+            ? `还在读取你的关注列表（已读 ${followed.size} 人），可以先开始点，<b>已关注的人会陆续从列表消失</b>${prog}`
+            : `正在读取你的关注列表…${prog}`);
+        await new Promise(ok => setTimeout(ok, 2000));
+        if (run !== running) return;
+        const resp = await fetch(`/api/job/${r.job_id}?since=${since}`);
+        if (!resp.ok) throw new Error(resp.status === 404 ? '查询任务丢失（服务器可能重启了），请再点一次查找' : '网络出错，请再点一次查找');
+        j = await resp.json();
+        j.ids.forEach(id => followed.add(id));
+        since = j.next;
+      }
+      if (j.status === 'error') throw new Error(j.error);
+      me.complete = j.complete;
+    }
+    setStatus(me.complete ? '' : '你关注的人太多，只读取了前 5000 个，结果里可能混有已关注的人。');
+    render();
+  } catch (err) {
+    if (run === running) setStatus(esc(err.message), 'err');
+  } finally {
+    if (run === running) $('go').disabled = false;
+  }
+};
+
+async function post(url, body) {
+  const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.detail || '请求失败');
+  return j;
+}
+
+$('join').onclick = async () => {
+  const username = $('u').value.trim();
+  if (!username) return $('u').focus();
+  $('join').disabled = true;
+  setStatus('正在确认你的蓝V身份…<div class="prog"><i></i></div>');
+  try {
+    const r = await post('/api/join', { username });
+    setStatus(esc(r.msg), 'ok');
+    loadStats();
+  } catch (err) {
+    setStatus(esc(err.message), 'err');
+  } finally {
+    $('join').disabled = false;
+  }
+};
+
+$('u').value = store('username', '');
+loadStats();
+
+// 书签：源码拼成 javascript: 链接，只能拖进收藏栏用
+let bmCode = '';
+fetch('/bm.js').then(r => r.text()).then(code => {
+  // 去掉注释和缩进，手机书签网址短一点
+  const min = code.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '').replace(/^\s+/gm, '').replace(/\n+/g, '\n').trim();
+  bmCode = 'javascript:' + encodeURIComponent(min);
+  $('bmlink').href = bmCode;
+});
+$('bmlink').onclick = e => { e.preventDefault(); alert('请把这个按钮拖到浏览器收藏栏，然后在 x.com 的「正在关注」页上点它'); };
+$('bmcopy').onclick = async () => {
+  try { await navigator.clipboard.writeText(bmCode); }
+  catch {
+    const t = document.createElement('textarea');
+    t.value = bmCode; document.body.append(t); t.select(); document.execCommand('copy'); t.remove();
+  }
+  $('bmcopy').textContent = '已复制 ✓';
+};
+
+// 书签读完跳回来：结果在 #bm= 后面（不经过服务器）
+async function fromBookmark() {
+  if (!location.hash.startsWith('#bm=')) return;
+  let d;
+  try { d = JSON.parse(decodeURIComponent(location.hash.slice(4))); } catch { return; }
+  history.replaceState(null, '', location.pathname);
+  if (!d || !d.u) return;
+  $('u').value = '@' + d.u;
+  save('username', '@' + d.u);
+  running++;
+  await poolReady;
+  me = { username: d.u, complete: !!d.d };
+  followed = new Set(d.i || []);
+  followedNames = new Set((d.n || []).map(s => s.toLowerCase()));
+  shown = 100;
+  setStatus(`已用书签读取你关注的 ${Math.max(followed.size, followedNames.size)} 人` +
+    (d.d ? '' : '（中途停止了，结果里可能混有已关注的人）'), d.d ? 'ok' : '');
+  render();
+}
+fromBookmark();
+</script>
+</body>
+</html>
