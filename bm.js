@@ -1,8 +1,8 @@
 /* 蓝V互关雷达 · 书签
-   在 x.com 你的「正在关注」页上运行：自动往下滚，记下你关注的每个人，读完跳回 bluefriends.heyafan.com。
+   在 x.com 你的「正在关注」页上运行：自动往下滚，记下你关注的每个人，读完跳回 SITE。
    只读取关注列表，不会关注、发推、点赞或读私信，也不会把数据发到任何服务器（结果放在网址 # 后面，只有你的浏览器能看到）。 */
 (() => {
-  const SITE = 'https://bluefriends.heyafan.com/';
+  const SITE = 'http://localhost:8000/';   // 部署后改成你的域名
   if (!/(^|\.)(x|twitter)\.com$/.test(location.hostname)) {
     alert('请先打开 x.com 并登录，再点这个书签');
     return;
